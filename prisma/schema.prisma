@@ -11,19 +11,49 @@ datasource db {
 }
 
 
-enum Role {
-  USER
-  ADMIN
-}
-
 model User {
-  id Int @id @default(autoincrement())
-  email String @unique
-  first_name String?
-  last_name String?
-  avatar String?
-  password String
-  role Role @default(USER)
-  createdAt DateTime @default(now())
+  id            String    @id @default(uuid())
+  username      String    @unique
+  password      String
+  email         String    @unique
+  first_name    String?
+  last_name     String?
+  avatar        String?
+  createdAt     DateTime  @default(now())
+  products      Product[]
+  bids          Bid[]
+  wonAuctions   Auction[] @relation("UserWins")
 }
 
+model Product {
+  id          String   @id @default(uuid())
+  title       String
+  picture     String
+  description String
+  owner       User     @relation(fields: [userId], references: [id])
+  userId      String
+  auction     Auction?
+}
+
+model Auction {
+  id            String   @id @default(uuid())
+  start_date    DateTime
+  end_date      DateTime
+  starting_price Float
+  currentBid    Float?
+  product       Product  @relation(fields: [productId], references: [id])
+  productId     String   @unique
+  bids          Bid[]
+  currentWinner User?    @relation("UserWins", fields: [currentWinnerId], references: [id])
+  currentWinnerId String?
+}
+
+model Bid {
+  id        String   @id @default(uuid())
+  amount    Float
+  bidTime   DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  auction   Auction  @relation(fields: [auctionId], references: [id])
+  auctionId String
+}

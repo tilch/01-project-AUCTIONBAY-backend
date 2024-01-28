@@ -3,7 +3,9 @@ import { Body, Controller, Post, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { LoginDto } from './dto/login-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('login / signup')
 @Controller()
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -29,7 +31,7 @@ export class AuthController {
     }
   }
 
-  @Post('/register')
+  @Post('/signup')
   async register(
     @Req() request: Request,
     @Res() response: Response,

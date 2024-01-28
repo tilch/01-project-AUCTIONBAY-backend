@@ -1,7 +1,7 @@
 import { PrismaService } from '../../prisma.service';
-import { User } from './user.model';
+import { User } from '../../entities/user.model';
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Role } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -10,23 +10,19 @@ export class UserService {
   async getAllUsers(): Promise<User[]> {
     return this.prisma.user.findMany();
   }
-  async getUser(id: number): Promise<User | null> {
-    return this.prisma.user.findUnique({ where: { id: Number(id) } });
+  async getUser(id: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { id: String(id) } });
   }
 
   async createUser(data: User): Promise<User> {
-    // Check if a user with the same email already exists
     const existingUser = await this.prisma.user.findUnique({
       where: {
         email: data.email,
       },
     });
-
     if (existingUser) {
       throw new BadRequestException('User with that email already exists.');
     }
-
-    // Create a new user
     try {
       return await this.prisma.user.create({
         data,
@@ -38,22 +34,28 @@ export class UserService {
     }
   }
 
-  async updateUser(id: number, data: User): Promise<User> {
+  async updateUser(id: string, data: User): Promise<User> {
+    const updatedData: any = {
+      first_name: data.first_name,
+      last_name: data.last_name,
+      username: data.username,
+      email: data.email,
+      avatar: data.avatar,
+    };
+
+    if (data.password) {
+      updatedData.password = await bcrypt.hash(data.password, 10);
+    }
+
     return this.prisma.user.update({
-      where: { id: Number(id) },
-      data: {
-        first_name: data.first_name,
-        last_name: data.last_name,
-        password: data.password,
-        email: data.email,
-        avatar: data.avatar,
-      },
+      where: { id: String(id) },
+      data: updatedData,
     });
   }
 
-  async deleteUser(id: number): Promise<User> {
+  async deleteUser(id: string): Promise<User> {
     return this.prisma.user.delete({
-      where: { id: Number(id) },
+      where: { id: String(id) },
     });
   }
 }

@@ -1,4 +1,4 @@
-import { Prisma, Role } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 export class User implements Prisma.UserCreateInput {
   first_name: string;
@@ -7,11 +7,11 @@ export class User implements Prisma.UserCreateInput {
 
   avatar: string;
 
+  username: string;
+
   password: string;
 
   email: string;
-
-  role: Role;
 
   createdAt: Date;
 }

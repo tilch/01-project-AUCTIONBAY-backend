@@ -12,9 +12,13 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { User } from './user.model';
+import { User } from '../../entities/user.model';
 import { Request, Response } from 'express';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/auth.guard';
 
 @ApiTags('users')
@@ -22,6 +26,8 @@ import { JwtAuthGuard } from '../auth/auth.guard';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @ApiCreatedResponse({ description: 'List all users.' })
+  @ApiBadRequestResponse({ description: 'Error for list of users.' })
   @Get()
   @UseGuards(JwtAuthGuard)
   async getAllUsers(
@@ -37,31 +43,37 @@ export class UserController {
       });
     } catch (error) {
       return response.status(500).json({
-        status: 'Ok!',
         message: 'Internal Server error!',
       });
     }
   }
+
   @Get('id')
-  async getUser(@Param('id') id: number): Promise<User> {
+  async getUser(@Param('id') id: string): Promise<User> {
     return this.userService.getUser(id);
   }
 
-  @Post()
-  async createUser(@Body() postData: User): Promise<User> {
-    return this.userService.createUser(postData);
-  }
-
   @Delete()
-  async deleteUser(@Param('id') id: number): Promise<User> {
+  async deleteUser(@Param('id') id: string): Promise<User> {
     return this.userService.deleteUser(id);
   }
 
   @Put('/:id')
   async updateUser(
-    @Param('id') id: number,
+    @Param('id') id: string,
     @Body() postData: User,
-  ): Promise<User> {
-    return this.userService.updateUser(id, postData);
+  ): Promise<any> {
+    try {
+      await this.userService.updateUser(id, postData);
+      return {
+        status: 'Ok!',
+        message: 'Changes successfully made!',
+      };
+    } catch (error) {
+      return {
+        status: 'Error!',
+        message: 'Failed to update user.',
+      };
+    }
   }
 }

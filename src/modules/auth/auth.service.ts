@@ -5,7 +5,7 @@ import { UserService } from '../users/user.service';
 import { LoginDto } from './dto/login-user.dto';
 import * as bcrypt from 'bcrypt';
 import { RegisterUserDto } from './dto/register-user.dto';
-import { User } from '../users/user.model';
+import { User } from '../../entities/user.model';
 
 @Injectable()
 export class AuthService {
@@ -16,10 +16,10 @@ export class AuthService {
   ) {}
 
   async login(loginDto: LoginDto): Promise<any> {
-    const { email, password } = loginDto;
+    const { username, password } = loginDto;
 
     const users = await this.prismaService.user.findUnique({
-      where: { email },
+      where: { username },
     });
 
     if (!users) {
@@ -33,7 +33,7 @@ export class AuthService {
     }
 
     return {
-      token: this.jwtService.sign({ email }),
+      token: this.jwtService.sign({ username }),
     };
   }
 
@@ -41,13 +41,14 @@ export class AuthService {
     const createUser = new User();
     createUser.first_name = createDto.first_name;
     createUser.last_name = createDto.last_name;
+    createUser.username = createDto.username;
     createUser.email = createDto.email;
     createUser.password = await bcrypt.hash(createDto.password, 10);
 
     const user = await this.usersService.createUser(createUser);
 
     return {
-      token: this.jwtService.sign({ email: user.email }),
+      token: this.jwtService.sign({ username: user.username }),
     };
   }
 }
