@@ -20,32 +20,41 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/auth.guard';
+import { UserDto } from './dto/user.dto';
 
 @ApiTags('users')
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @ApiCreatedResponse({ description: 'List all users.' })
-  @ApiBadRequestResponse({ description: 'Error for list of users.' })
-  @Get()
+  // @ApiCreatedResponse({ description: 'List all users.' })
+  // @ApiBadRequestResponse({ description: 'Error for list of users.' })
+  // @Get()
+  // @UseGuards(JwtAuthGuard)
+  // async getAllUsers(
+  //   @Req() request: Request,
+  //   @Res() response: Response,
+  // ): Promise<User[] | any> {
+  //   try {
+  //     const result = await this.userService.getAllUsers();
+  //     return response.status(200).json({
+  //       status: 'Ok!',
+  //       message: 'Successfully fetch data!',
+  //       result: result,
+  //     });
+  //   } catch (error) {
+  //     return response.status(500).json({
+  //       message: 'Internal Server error!',
+  //     });
+  //   }
+  // }
+
+  @Get('me')
   @UseGuards(JwtAuthGuard)
-  async getAllUsers(
-    @Req() request: Request,
-    @Res() response: Response,
-  ): Promise<User[] | any> {
-    try {
-      const result = await this.userService.getAllUsers();
-      return response.status(200).json({
-        status: 'Ok!',
-        message: 'Successfully fetch data!',
-        result: result,
-      });
-    } catch (error) {
-      return response.status(500).json({
-        message: 'Internal Server error!',
-      });
-    }
+  @ApiTags('/me')
+  async getMe(@Req() req: any): Promise<UserDto> {
+    const username = req.user.username;
+    return this.userService.getMe(username);
   }
 
   @Get('id')

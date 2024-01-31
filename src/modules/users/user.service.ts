@@ -2,16 +2,36 @@ import { PrismaService } from '../../prisma.service';
 import { User } from '../../entities/user.model';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import bcrypt from 'bcrypt';
+import { UserDto } from './dto/user.dto';
 
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
-  async getAllUsers(): Promise<User[]> {
-    return this.prisma.user.findMany();
-  }
+  // async getAllUsers(): Promise<User[]> {
+  //   return this.prisma.user.findMany();
+  // }
+
   async getUser(id: string): Promise<User | null> {
     return this.prisma.user.findUnique({ where: { id: String(id) } });
+  }
+
+  async getMe(username: string): Promise<UserDto> {
+    const user = await this.prisma.user.findUnique({
+      where: { username },
+      select: {
+        id: false,
+        username: true,
+        email: true,
+        first_name: true,
+        last_name: true,
+        avatar: true,
+        updatedAt: true,
+        createdAt: true,
+        password: false,
+      },
+    });
+    return user as UserDto;
   }
 
   async createUser(data: User): Promise<User> {

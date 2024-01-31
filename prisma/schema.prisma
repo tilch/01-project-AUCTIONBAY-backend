@@ -12,48 +12,42 @@ datasource db {
 
 
 model User {
-  id            String    @id @default(uuid())
-  username      String    @unique
-  password      String
-  email         String    @unique
-  first_name    String?
-  last_name     String?
-  avatar        String?
-  createdAt     DateTime  @default(now())
-  products      Product[]
-  bids          Bid[]
-  wonAuctions   Auction[] @relation("UserWins")
-}
-
-model Product {
-  id          String   @id @default(uuid())
-  title       String
-  picture     String
-  description String
-  owner       User     @relation(fields: [userId], references: [id])
-  userId      String
-  auction     Auction?
+  id String @id @default(uuid())
+  username String @unique
+  email String @unique
+  password String
+  first_name String?
+  last_name String?
+  avatar String?
+  updatedAt DateTime @default(now())
+  createdAt DateTime @default(now())
+  auctions Auction[]
+  bids Bid[]
 }
 
 model Auction {
-  id            String   @id @default(uuid())
-  start_date    DateTime
-  end_date      DateTime
-  starting_price Float
-  currentBid    Float?
-  product       Product  @relation(fields: [productId], references: [id])
-  productId     String   @unique
-  bids          Bid[]
-  currentWinner User?    @relation("UserWins", fields: [currentWinnerId], references: [id])
-  currentWinnerId String?
+  id Int @id @default(autoincrement())
+  title String
+  description String
+  startPrice Float
+  currentPrice Float?
+  startTime DateTime
+  endTime DateTime
+  imageUrl String?
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  bids Bid[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Bid {
-  id        String   @id @default(uuid())
-  amount    Float
-  bidTime   DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  auction   Auction  @relation(fields: [auctionId], references: [id])
-  auctionId String
+  id Int @id @default(autoincrement())
+  amount Float
+  bidTime DateTime
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  auctionId Int
+  auction Auction @relation(fields: [auctionId], references: [id])
+  createdAt DateTime @default(now())
 }
