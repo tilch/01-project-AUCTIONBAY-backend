@@ -3,14 +3,24 @@ import { Body, Controller, Post, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { LoginDto } from './dto/login-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+  ApiInternalServerErrorResponse,
+} from '@nestjs/swagger';
 
-@ApiTags('login / signup')
+@ApiTags('Authentication')
 @Controller()
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('/login')
+  @ApiOperation({ summary: 'User login' })
+  @ApiOkResponse({ description: 'User successfully logged in' })
+  @ApiBadRequestResponse({ description: 'Bad request' })
+  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   async login(
     @Req() request: Request,
     @Res() response: Response,
@@ -32,6 +42,10 @@ export class AuthController {
   }
 
   @Post('/signup')
+  @ApiOperation({ summary: 'User registration' })
+  @ApiOkResponse({ description: 'User successfully registered' })
+  @ApiBadRequestResponse({ description: 'Bad request' })
+  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   async register(
     @Req() request: Request,
     @Res() response: Response,
@@ -41,7 +55,7 @@ export class AuthController {
       const result = await this.authService.register(registerDto);
       return response.status(200).json({
         status: 'Ok!',
-        message: 'Successfully register user!',
+        message: 'Successfully registered user!',
         result: result,
       });
     } catch (err) {
