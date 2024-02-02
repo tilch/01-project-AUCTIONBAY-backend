@@ -57,6 +57,29 @@ export class AuctionController {
       updateAuctionDto,
     );
   }
+  @Get('/my-auctions')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get auctions created by the current user' })
+  async findUserAuctions(@Req() req) {
+    const username = req.user.username;
+    return this.auctionService.findAuctionsCreatedByUser(username);
+  }
+
+  @Get('/bidding')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get auctions where the current user is bidding' })
+  async findBiddingAuctions(@Req() req) {
+    const username = req.user.username;
+    return this.auctionService.findBiddingAuctionsByUser(username);
+  }
+
+  @Get('/won')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get auctions won by the current user' })
+  async findWonAuctions(@Req() req) {
+    const username = req.user.username;
+    return this.auctionService.findWonAuctionsByUser(username);
+  }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)

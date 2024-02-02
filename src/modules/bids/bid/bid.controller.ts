@@ -42,6 +42,17 @@ export class BidController {
     return this.bidService.findAll();
   }
 
+  @Get('auction/:auctionId')
+  @ApiOperation({ summary: 'Retrieve all bids for a specific auction' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successfully retrieved list of bids for the auction.',
+  })
+  @ApiResponse({ status: 404, description: 'Auction not found.' })
+  getBidsForAuction(@Param('auctionId') auctionId: number) {
+    return this.bidService.getBidsForAuction(auctionId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Retrieve a bid by ID' })
   @ApiResponse({ status: 200, description: 'Successfully retrieved bid.' })

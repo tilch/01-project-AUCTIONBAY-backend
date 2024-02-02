@@ -1,5 +1,5 @@
 import { PrismaService } from '../../prisma.service';
-import { User } from '../../entities/user.model';
+import { User } from './user.model';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import bcrypt from 'bcrypt';
 import { UserDto } from './dto/user.dto';
@@ -12,8 +12,21 @@ export class UserService {
   //   return this.prisma.user.findMany();
   // }
 
-  async getUser(id: string): Promise<User | null> {
-    return this.prisma.user.findUnique({ where: { id: String(id) } });
+  async getUser(id: string): Promise<UserDto | null> {
+    return this.prisma.user.findUnique({
+      where: { id: String(id) },
+      select: {
+        id: true,
+        first_name: true,
+        last_name: true,
+        avatar: true,
+        username: true,
+        email: true,
+        createdAt: true,
+        updatedAt: true,
+        password: false,
+      },
+    });
   }
 
   async getMe(username: string): Promise<UserDto> {
@@ -34,7 +47,7 @@ export class UserService {
     return user as UserDto;
   }
 
-  async createUser(data: User): Promise<User> {
+  async createUser(data: User): Promise<UserDto> {
     const existingUser = await this.prisma.user.findUnique({
       where: {
         email: data.email,
@@ -54,7 +67,7 @@ export class UserService {
     }
   }
 
-  async updateUser(id: string, data: User): Promise<User> {
+  async updateUser(id: string, data: User): Promise<UserDto> {
     const updatedData: any = {
       first_name: data.first_name,
       last_name: data.last_name,
@@ -69,11 +82,22 @@ export class UserService {
 
     return this.prisma.user.update({
       where: { id: String(id) },
+      select: {
+        id: true,
+        first_name: true,
+        last_name: true,
+        avatar: true,
+        username: true,
+        email: true,
+        createdAt: true,
+        updatedAt: true,
+        password: false,
+      },
       data: updatedData,
     });
   }
 
-  async deleteUser(id: string): Promise<User> {
+  async deleteUser(id: string): Promise<UserDto> {
     return this.prisma.user.delete({
       where: { id: String(id) },
     });

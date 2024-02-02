@@ -5,7 +5,7 @@ import { UserService } from '../users/user.service';
 import { LoginDto } from './dto/login-user.dto';
 import * as bcrypt from 'bcrypt';
 import { RegisterUserDto } from './dto/register-user.dto';
-import { User } from '../../entities/user.model';
+import { User } from '../users/user.model';
 
 @Injectable()
 export class AuthService {

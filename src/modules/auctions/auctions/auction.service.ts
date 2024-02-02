@@ -79,12 +79,69 @@ export class AuctionService {
   }
 
   async findAuctionById(id: number): Promise<Auction | null> {
-    // Convert `id` to an integer if it's not already
-    const auctionId = parseInt(String(id), 10);
+    const auctionId = parseInt(String(id), 10); // Ensure id is a number
     return this.prisma.auction.findUnique({
       where: {
-        id: auctionId,
+        id: auctionId, // Use the correct variable name here
       },
     });
+  }
+  async findAuctionsCreatedByUser(username: string): Promise<Auction[]> {
+    const user = await this.prisma.user.findUnique({
+      where: { username },
+    });
+    if (!user) {
+      throw new UnauthorizedException('User not found.');
+    }
+    return this.prisma.auction.findMany({
+      where: { userId: user.id },
+    });
+  }
+
+  async findBiddingAuctionsByUser(username: string): Promise<Auction[]> {
+    const user = await this.prisma.user.findUnique({
+      where: { username },
+    });
+    if (!user) {
+      throw new UnauthorizedException('User not found.');
+    }
+    return this.prisma.auction.findMany({
+      where: {
+        bids: {
+          some: {
+            userId: user.id,
+          },
+        },
+      },
+    });
+  }
+  async findWonAuctionsByUser(username: string): Promise<Auction[]> {
+    const user = await this.prisma.user.findUnique({
+      where: { username },
+    });
+    if (!user) {
+      throw new UnauthorizedException('User not found.');
+    }
+    // find all auctions that have ended
+    const endedAuctions = await this.prisma.auction.findMany({
+      where: {
+        endTime: {
+          lt: new Date(), // filter out auctions that have already ended
+        },
+      },
+      include: {
+        bids: {
+          orderBy: {
+            amount: 'desc', // order bids by amount in descending order
+          },
+          take: 1, // take the highest bid
+        },
+      },
+    });
+    // filter auctions where the highest bid was made by the user
+    return endedAuctions.filter(
+      (auction) =>
+        auction.bids.length > 0 && auction.bids[0].userId === user.id,
+    );
   }
 }

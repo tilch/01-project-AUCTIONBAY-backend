@@ -45,4 +45,19 @@ export class BidService {
       where: { id },
     });
   }
+
+  async getBidsForAuction(auctionId: number) {
+    const auctionId_parsed = parseInt(String(auctionId), 10);
+    return this.prisma.bid.findMany({
+      where: {
+        auctionId: auctionId_parsed,
+      },
+      include: {
+        user: true,
+      },
+      orderBy: {
+        bidTime: 'desc',
+      },
+    });
+  }
 }

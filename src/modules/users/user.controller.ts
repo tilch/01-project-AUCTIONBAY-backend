@@ -9,7 +9,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { User } from '../../entities/user.model';
+import { User } from './user.model';
 import {
   ApiBadRequestResponse,
   ApiOkResponse,
@@ -49,7 +49,7 @@ export class UserController {
   @ApiOperation({ summary: 'Get user by ID' })
   @ApiOkResponse({ description: 'Successfully fetched user data.' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
-  async getUser(@Param('id') id: string): Promise<User> {
+  async getUser(@Param('id') id: string): Promise<UserDto> {
     return this.userService.getUser(id);
   }
 
@@ -57,7 +57,7 @@ export class UserController {
   @ApiOperation({ summary: 'Delete a user' })
   @ApiOkResponse({ description: 'User successfully deleted.' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
-  async deleteUser(@Param('id') id: string): Promise<User> {
+  async deleteUser(@Param('id') id: string): Promise<UserDto> {
     return this.userService.deleteUser(id);
   }
 
