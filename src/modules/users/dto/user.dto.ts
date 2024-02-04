@@ -12,11 +12,6 @@ export class UserDto {
     description: "URL of the user's avatar image",
     required: false,
   })
-  avatar: string;
-
-  @ApiProperty({ example: 'john_doe', description: 'Username of the user' })
-  username: string;
-
   @ApiProperty({
     example: 'john.doe@example.com',
     description: 'Email address of the user',

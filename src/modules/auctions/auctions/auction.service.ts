@@ -27,12 +27,12 @@ export class AuctionService {
 
   async updateAuction(
     id: string,
-    username: string,
+    email: string,
     updateAuctionDto: UpdateAuctionDto,
   ): Promise<Auction | null> {
     const auctionId = parseInt(id, 10);
     const user = await this.prisma.user.findUnique({
-      where: { username: username },
+      where: { email: email },
     });
     if (!user) {
       throw new UnauthorizedException('User not found.');
@@ -49,10 +49,10 @@ export class AuctionService {
     });
   }
 
-  async deleteAuction(id: number, username: string): Promise<Auction | null> {
+  async deleteAuction(id: number, email: string): Promise<Auction | null> {
     const auctionId = parseInt(String(id), 10);
     const user = await this.prisma.user.findUnique({
-      where: { username: username },
+      where: { email: email },
     });
     if (!user) {
       throw new UnauthorizedException('User not found.');
@@ -86,9 +86,9 @@ export class AuctionService {
       },
     });
   }
-  async findAuctionsCreatedByUser(username: string): Promise<Auction[]> {
+  async findAuctionsCreatedByUser(email: string): Promise<Auction[]> {
     const user = await this.prisma.user.findUnique({
-      where: { username },
+      where: { email },
     });
     if (!user) {
       throw new UnauthorizedException('User not found.');
@@ -98,9 +98,9 @@ export class AuctionService {
     });
   }
 
-  async findBiddingAuctionsByUser(username: string): Promise<Auction[]> {
+  async findBiddingAuctionsByUser(email: string): Promise<Auction[]> {
     const user = await this.prisma.user.findUnique({
-      where: { username },
+      where: { email },
     });
     if (!user) {
       throw new UnauthorizedException('User not found.');
@@ -115,9 +115,9 @@ export class AuctionService {
       },
     });
   }
-  async findWonAuctionsByUser(username: string): Promise<Auction[]> {
+  async findWonAuctionsByUser(email: string): Promise<Auction[]> {
     const user = await this.prisma.user.findUnique({
-      where: { username },
+      where: { email },
     });
     if (!user) {
       throw new UnauthorizedException('User not found.');

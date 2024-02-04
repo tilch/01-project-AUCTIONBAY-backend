@@ -10,10 +10,6 @@ export class RegisterUserDto {
   email: string;
 
   @IsString()
-  @ApiProperty({ example: 'john_doe', description: 'Username for the user' })
-  username: string;
-
-  @IsString()
   @ApiProperty({
     example: 'yourPassword123#',
     description: 'Password for the user',

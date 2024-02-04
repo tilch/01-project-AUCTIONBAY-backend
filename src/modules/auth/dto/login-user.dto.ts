@@ -5,12 +5,12 @@ export class LoginDto {
   @IsString()
   @Length(5, 40)
   @ApiProperty({
-    example: 'john_doe',
-    description: 'Username for the user',
+    example: 'example@example.com',
+    description: 'Email for the user',
     minLength: 5,
     maxLength: 40,
   })
-  username: string;
+  email: string;
 
   @IsString()
   @Length(5, 40)

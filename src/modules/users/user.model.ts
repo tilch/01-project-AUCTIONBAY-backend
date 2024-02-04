@@ -15,9 +15,6 @@ export class User implements Prisma.UserCreateInput {
   })
   avatar: string;
 
-  @ApiProperty({ example: 'john_doe', description: 'Username of the user' })
-  username: string;
-
   @ApiProperty({
     example: 'yourSecurePassword',
     description: 'Password for the user account',

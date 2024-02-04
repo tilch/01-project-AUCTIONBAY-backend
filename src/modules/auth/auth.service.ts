@@ -16,10 +16,10 @@ export class AuthService {
   ) {}
 
   async login(loginDto: LoginDto): Promise<any> {
-    const { username, password } = loginDto;
+    const { email, password } = loginDto;
 
     const users = await this.prismaService.user.findUnique({
-      where: { username },
+      where: { email },
     });
 
     if (!users) {
@@ -33,7 +33,7 @@ export class AuthService {
     }
 
     return {
-      token: this.jwtService.sign({ username }),
+      token: this.jwtService.sign({ email }),
     };
   }
 
@@ -41,14 +41,13 @@ export class AuthService {
     const createUser = new User();
     createUser.first_name = createDto.first_name;
     createUser.last_name = createDto.last_name;
-    createUser.username = createDto.username;
     createUser.email = createDto.email;
     createUser.password = await bcrypt.hash(createDto.password, 10);
 
     const user = await this.usersService.createUser(createUser);
 
     return {
-      token: this.jwtService.sign({ username: user.username }),
+      token: this.jwtService.sign({ email: user.email }),
     };
   }
 }

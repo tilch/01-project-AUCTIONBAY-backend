@@ -20,7 +20,6 @@ export class UserService {
         first_name: true,
         last_name: true,
         avatar: true,
-        username: true,
         email: true,
         createdAt: true,
         updatedAt: true,
@@ -29,12 +28,11 @@ export class UserService {
     });
   }
 
-  async getMe(username: string): Promise<UserDto> {
+  async getMe(email: string): Promise<UserDto> {
     const user = await this.prisma.user.findUnique({
-      where: { username },
+      where: { email },
       select: {
         id: false,
-        username: true,
         email: true,
         first_name: true,
         last_name: true,
@@ -71,7 +69,6 @@ export class UserService {
     const updatedData: any = {
       first_name: data.first_name,
       last_name: data.last_name,
-      username: data.username,
       email: data.email,
       avatar: data.avatar,
     };
@@ -87,7 +84,6 @@ export class UserService {
         first_name: true,
         last_name: true,
         avatar: true,
-        username: true,
         email: true,
         createdAt: true,
         updatedAt: true,
