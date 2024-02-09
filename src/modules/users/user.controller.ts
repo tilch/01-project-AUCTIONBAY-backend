@@ -41,8 +41,8 @@ export class UserController {
   @ApiOkResponse({ description: 'Successfully fetched user data.' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async getMe(@Req() req: any): Promise<UserDto> {
-    const username = req.user.username;
-    return this.userService.getMe(username);
+    const email = req.user.email;
+    return this.userService.getMe(email);
   }
 
   @Get(':id')

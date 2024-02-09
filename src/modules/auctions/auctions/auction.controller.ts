@@ -61,24 +61,24 @@ export class AuctionController {
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get auctions created by the current user' })
   async findUserAuctions(@Req() req) {
-    const username = req.user.username;
-    return this.auctionService.findAuctionsCreatedByUser(username);
+    const email = req.user.email;
+    return this.auctionService.findAuctionsCreatedByUser(email);
   }
 
   @Get('/bidding')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get auctions where the current user is bidding' })
   async findBiddingAuctions(@Req() req) {
-    const username = req.user.username;
-    return this.auctionService.findBiddingAuctionsByUser(username);
+    const email = req.user.email;
+    return this.auctionService.findBiddingAuctionsByUser(email);
   }
 
   @Get('/won')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get auctions won by the current user' })
   async findWonAuctions(@Req() req) {
-    const username = req.user.username;
-    return this.auctionService.findWonAuctionsByUser(username);
+    const email = req.user.email;
+    return this.auctionService.findWonAuctionsByUser(email);
   }
 
   @Delete(':id')
@@ -88,10 +88,10 @@ export class AuctionController {
   @ApiBadRequestResponse({ description: 'Bad Request.' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
   async delete(@Param('id') id: number, @Req() req) {
-    if (!req.user || !req.user.username) {
+    if (!req.user || !req.user.email) {
       throw new UnauthorizedException('User not authenticated.');
     }
-    return this.auctionService.deleteAuction(id, req.user.username);
+    return this.auctionService.deleteAuction(id, req.user.email);
   }
 
   @Get('user/:userId')

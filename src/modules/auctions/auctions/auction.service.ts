@@ -1,9 +1,6 @@
 import {
   BadRequestException,
-  Body,
   Injectable,
-  Param,
-  Req,
   UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from '../../../prisma.service';
@@ -75,7 +72,13 @@ export class AuctionService {
   }
 
   async findAllAuctions(): Promise<Auction[]> {
-    return this.prisma.auction.findMany();
+    return this.prisma.auction.findMany({
+      where: {
+        endTime: {
+          gt: new Date(), // This checks that the endTime is greater than the current date and time
+        },
+      },
+    });
   }
 
   async findAuctionById(id: number): Promise<Auction | null> {
@@ -88,8 +91,9 @@ export class AuctionService {
   }
   async findAuctionsCreatedByUser(email: string): Promise<Auction[]> {
     const user = await this.prisma.user.findUnique({
-      where: { email },
+      where: { email: email },
     });
+
     if (!user) {
       throw new UnauthorizedException('User not found.');
     }
@@ -105,6 +109,7 @@ export class AuctionService {
     if (!user) {
       throw new UnauthorizedException('User not found.');
     }
+    const now = new Date(); // Get current date and time
     return this.prisma.auction.findMany({
       where: {
         bids: {
@@ -112,9 +117,13 @@ export class AuctionService {
             userId: user.id,
           },
         },
+        endTime: {
+          gt: now,
+        },
       },
     });
   }
+
   async findWonAuctionsByUser(email: string): Promise<Auction[]> {
     const user = await this.prisma.user.findUnique({
       where: { email },
