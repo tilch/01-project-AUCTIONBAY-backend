@@ -23,13 +23,13 @@ export class CreateAuctionDto {
     example: 100.0,
     description: 'Current price of the auction item',
   })
-  currentPrice: number;
+  currentPrice?: number;
 
   @ApiProperty({
     example: '2024-01-01T00:00:00.000Z',
     description: 'Start time of the auction',
   })
-  startTime: Date;
+  startTime?: Date;
 
   @ApiProperty({
     example: '2024-02-01T00:00:00.000Z',
@@ -42,10 +42,4 @@ export class CreateAuctionDto {
     required: false,
   })
   imageUrl?: string;
-
-  @ApiProperty({
-    example: '123e4567-e89b-12d3-a456-426614174000',
-    description: 'User ID of the auction creator',
-  })
-  userId: string;
 }

@@ -22,6 +22,7 @@ export class BidService {
   }
 
   async createBid(userId: string, auctionId: number, amount: number) {
+    // Create the bid
     const bid = await this.prisma.bid.create({
       data: {
         userId,
@@ -31,10 +32,24 @@ export class BidService {
       },
     });
 
-    await this.prisma.auction.update({
+    // Fetch the current auction to compare bid amounts
+    const auction = await this.prisma.auction.findUnique({
       where: { id: auctionId },
-      data: { currentPrice: amount },
     });
+
+    // Ensure the auction exists and compare the new bid with the current highest bid
+    if (
+      auction &&
+      (auction.currentPrice === null || amount > auction.currentPrice)
+    ) {
+      await this.prisma.auction.update({
+        where: { id: auctionId },
+        data: {
+          currentPrice: amount,
+          currentWinner: userId,
+        },
+      });
+    }
 
     return bid;
   }

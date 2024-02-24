@@ -27,7 +27,7 @@ import { JwtAuthGuard } from '../../auth/auth.guard';
 import { UpdateAuctionDto } from './dto/update-auction.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { multerConfig } from '../../../middleware/multer.config';
+import { multerConfigAuctions } from '../../../middleware/auctions-multer.config';
 
 @ApiTags('auctions')
 @Controller('auctions')
@@ -36,24 +36,30 @@ export class AuctionController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('image', multerConfig))
+  @UseInterceptors(FileInterceptor('image', multerConfigAuctions))
   @ApiOperation({ summary: 'Create a new auction' })
   @ApiCreatedResponse({ description: 'Auction has been successfully created.' })
   @ApiBadRequestResponse({ description: 'Bad Request.' })
   async create(
+    @Req() req,
     @UploadedFile() file: Express.Multer.File,
     @Body() createAuctionDto: CreateAuctionDto,
   ) {
-    // Assuming your service method is adjusted to accept an additional argument for the file path
-    // You'll need to handle file storage here and then pass the file path to your service method
-
     if (!file)
       throw new BadRequestException('File upload failed or was not provided.');
 
-    const imagePath = '/uploads/' + file.filename; // Adjust according to your storage configuration
+    const imagePath = '/uploads/auctions/' + file.filename;
+    const email = req.user.email;
 
-    // Now pass both the DTO and the imagePath to your service method
-    return this.auctionService.createAuction(createAuctionDto, imagePath);
+    if (!email) {
+      throw new BadRequestException('User email cannot be found.');
+    }
+
+    return this.auctionService.createAuction(
+      createAuctionDto,
+      email,
+      imagePath,
+    );
   }
 
   @Patch(':id')

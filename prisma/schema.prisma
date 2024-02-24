@@ -30,12 +30,13 @@ model Auction {
   description String
   startPrice Float
   currentPrice Float?
-  startTime DateTime
+  startTime DateTime?
   endTime DateTime
   imageUrl String?
   userId String
   user User @relation(fields: [userId], references: [id])
   bids Bid[]
+  currentWinner String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

@@ -15,6 +15,7 @@ export class AuctionService {
 
   async createAuction(
     createAuctionDto: CreateAuctionDto,
+    email: string, // Now expecting email instead of userId
     imagePath: string,
   ): Promise<Auction> {
     const startPrice = parseFloat(String(createAuctionDto.startPrice));
@@ -22,8 +23,12 @@ export class AuctionService {
     try {
       const auctionData = {
         ...createAuctionDto,
-        startPrice: startPrice, // Use the converted float value
+        startPrice: startPrice,
         imageUrl: imagePath,
+        // Connect the auction to the user via email
+        user: {
+          connect: { email: email },
+        },
       };
 
       return this.prisma.auction.create({ data: auctionData });
