@@ -7,14 +7,26 @@ import { PrismaService } from '../../../prisma.service';
 import { Auction } from '../../../entities/auction.model';
 import { CreateAuctionDto } from './dto/create-auction.dto';
 import { UpdateAuctionDto } from './dto/update-auction.dto';
+import { diskStorage } from 'multer';
 
 @Injectable()
 export class AuctionService {
   constructor(private prisma: PrismaService) {}
 
-  async createAuction(createAuctionDto: CreateAuctionDto): Promise<Auction> {
+  async createAuction(
+    createAuctionDto: CreateAuctionDto,
+    imagePath: string,
+  ): Promise<Auction> {
+    const startPrice = parseFloat(String(createAuctionDto.startPrice));
+
     try {
-      return this.prisma.auction.create({ data: createAuctionDto });
+      const auctionData = {
+        ...createAuctionDto,
+        startPrice: startPrice, // Use the converted float value
+        imageUrl: imagePath,
+      };
+
+      return this.prisma.auction.create({ data: auctionData });
     } catch (error) {
       throw new BadRequestException(
         'Something went wrong while creating a new auction',

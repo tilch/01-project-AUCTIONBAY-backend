@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -8,7 +9,9 @@ import {
   Post,
   Req,
   UnauthorizedException,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -22,6 +25,9 @@ import { AuctionService } from './auction.service';
 import { CreateAuctionDto } from './dto/create-auction.dto';
 import { JwtAuthGuard } from '../../auth/auth.guard';
 import { UpdateAuctionDto } from './dto/update-auction.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { multerConfig } from '../../../middleware/multer.config';
 
 @ApiTags('auctions')
 @Controller('auctions')
@@ -30,11 +36,24 @@ export class AuctionController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('image', multerConfig))
   @ApiOperation({ summary: 'Create a new auction' })
   @ApiCreatedResponse({ description: 'Auction has been successfully created.' })
   @ApiBadRequestResponse({ description: 'Bad Request.' })
-  async create(@Body() createAuctionDto: CreateAuctionDto) {
-    return this.auctionService.createAuction(createAuctionDto);
+  async create(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() createAuctionDto: CreateAuctionDto,
+  ) {
+    // Assuming your service method is adjusted to accept an additional argument for the file path
+    // You'll need to handle file storage here and then pass the file path to your service method
+
+    if (!file)
+      throw new BadRequestException('File upload failed or was not provided.');
+
+    const imagePath = '/uploads/' + file.filename; // Adjust according to your storage configuration
+
+    // Now pass both the DTO and the imagePath to your service method
+    return this.auctionService.createAuction(createAuctionDto, imagePath);
   }
 
   @Patch(':id')

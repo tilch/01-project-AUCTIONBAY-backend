@@ -38,7 +38,6 @@ export class CreateAuctionDto {
   endTime: Date;
 
   @ApiProperty({
-    example: 'http://example.com/image.jpg',
     description: 'URL of the image of the auction item',
     required: false,
   })

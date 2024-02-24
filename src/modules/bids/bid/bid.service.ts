@@ -5,6 +5,22 @@ import { PrismaService } from '../../../prisma.service';
 export class BidService {
   constructor(private prisma: PrismaService) {}
 
+  async createBidWithUserEmail(
+    email: string,
+    auctionId: number,
+    amount: number,
+  ) {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return this.createBid(user.id, auctionId, amount);
+  }
+
   async createBid(userId: string, auctionId: number, amount: number) {
     const bid = await this.prisma.bid.create({
       data: {

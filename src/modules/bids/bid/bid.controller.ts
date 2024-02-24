@@ -6,11 +6,14 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { BidService } from './bid.service';
 import { CreateBidDto } from './dto/create-bid.dto';
 import { UpdateBidDto } from './dto/update-bid.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../../auth/auth.guard';
+import { GetUser } from '../../../decorators/user.decorator';
 
 @Controller('bids')
 @ApiTags('bids')
@@ -18,15 +21,19 @@ export class BidController {
   constructor(private readonly bidService: BidService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Create bid' })
   @ApiResponse({
     status: 201,
     description: 'The record has been successfully created.',
   })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
-  create(@Body() createBidDto: CreateBidDto) {
-    return this.bidService.createBid(
-      createBidDto.userId,
+  create(
+    @GetUser() user: any,
+    @Body() createBidDto: Omit<CreateBidDto, 'userId'>,
+  ) {
+    return this.bidService.createBidWithUserEmail(
+      user.email,
       createBidDto.auctionId,
       createBidDto.amount,
     );
