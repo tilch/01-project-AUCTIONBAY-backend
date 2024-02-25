@@ -48,6 +48,6 @@ model Bid {
   userId String
   user User @relation(fields: [userId], references: [id])
   auctionId Int
-  auction Auction @relation(fields: [auctionId], references: [id])
+  auction Auction @relation(fields: [auctionId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 }

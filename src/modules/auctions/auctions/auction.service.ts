@@ -114,9 +114,31 @@ export class AuctionService {
     if (!user) {
       throw new UnauthorizedException('User not found.');
     }
-    return this.prisma.auction.findMany({
-      where: { userId: user.id },
+    const now = new Date();
+    const activeAuctions = await this.prisma.auction.findMany({
+      where: {
+        userId: user.id,
+        endTime: {
+          gt: now,
+        },
+      },
+      orderBy: {
+        endTime: 'asc',
+      },
     });
+    const expiredAuctions = await this.prisma.auction.findMany({
+      where: {
+        userId: user.id,
+        endTime: {
+          lte: now,
+        },
+      },
+      orderBy: {
+        endTime: 'asc',
+      },
+    });
+
+    return [...activeAuctions, ...expiredAuctions];
   }
 
   async findBiddingAuctionsByUser(email: string): Promise<Auction[]> {

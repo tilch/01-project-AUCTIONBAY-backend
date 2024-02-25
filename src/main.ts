@@ -22,6 +22,7 @@ async function bootstrap() {
 
   // Setup to display files
   app.use('/files', express.static('files'));
+  app.use('/uploads', express.static('uploads'));
 
   // Setup Swagger
   const config = new DocumentBuilder()
