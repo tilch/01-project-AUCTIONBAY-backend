@@ -1,5 +1,7 @@
 
 # Project-01 AUCTIONBAY
+![image](https://github.com/tilch/01-project-AUCTIONBAY-backend/assets/46675169/e084361c-33a9-4ede-901d-eb8c5ab8459a)
+
 ## Description
 A back-end application that allows users to create, manage, and participate in auction events. Built with [NestJS](link) and [PostgreSQL](link),  this application offers features such as user authentication, auction creation and bidding.
 
