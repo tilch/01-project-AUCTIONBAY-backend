@@ -26,9 +26,11 @@ JavaScript, Typescript, Node, NestJS, Express, Git, GitHub, PostgreSQL, Prisma, 
    ```
 4. Configuration
 
-   4.1 Create a `.env` file in the root directory.
+   4.1 Create a database and connect to it: 
+
+   4.2 Create a `.env` file in the root directory.
    
-   4.2. Add the following environment variables:
+   4.3 Add the following environment variables:
    ```
    DATABASE_URL=postgresql://username:password@localhost:5432/your_db
    JWT_SECRET=your_jwt_secret
