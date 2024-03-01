@@ -27,8 +27,7 @@ JavaScript, Typescript, Node, NestJS, Express, Git, GitHub, PostgreSQL, Prisma, 
    npm install
    ```
 4. Configuration
-   ```
-   ```
+
    4.1 Create a `.env` file in the root directory.
    
    4.2. Add the following environment variables:
