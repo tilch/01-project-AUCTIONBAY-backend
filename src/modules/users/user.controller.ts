@@ -1,17 +1,22 @@
 import { UserService } from './user.service';
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
   Param,
+  Post,
   Put,
   Req,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { User } from './user.model';
 import {
   ApiBadRequestResponse,
+  ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -19,6 +24,8 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/auth.guard';
 import { UserDto } from './dto/user.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerConfigUsers } from '../../middleware/users-multer.config';
 
 @ApiTags('users')
 @Controller('users')
@@ -62,6 +69,7 @@ export class UserController {
   }
 
   @Put('/:id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Update a user' })
   @ApiOkResponse({ description: 'User successfully updated.' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
@@ -70,5 +78,33 @@ export class UserController {
     @Body() postData: User,
   ): Promise<any> {
     return this.userService.updateUser(id, postData);
+  }
+
+  @Put('/me/update/avatar')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('image', multerConfigUsers))
+  @ApiOperation({ summary: 'Upload and update user avatar' })
+  @ApiCreatedResponse({
+    description: 'User avatar has been correctly updated.',
+  })
+  @ApiBadRequestResponse({ description: 'Bad Request.' })
+  async updateAndUploadProfilePicture(
+    @Req() req,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException(
+        'Avatar upload failed or was not provided.',
+      );
+    }
+
+    const imagePath = '/uploads/users/' + file.filename;
+    const email = req.user.email;
+
+    if (!email) {
+      throw new BadRequestException('User email cannot be found.');
+    }
+
+    await this.userService.updateUserAvatarByEmail(email, imagePath);
   }
 }

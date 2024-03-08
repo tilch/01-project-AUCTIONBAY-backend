@@ -73,23 +73,31 @@ export class UserService {
       avatar: data.avatar,
     };
 
-    if (data.password) {
-      updatedData.password = await bcrypt.hash(data.password, 10);
-    }
-
     return this.prisma.user.update({
       where: { id: String(id) },
       select: {
-        id: true,
+        id: false,
         first_name: true,
         last_name: true,
         avatar: true,
         email: true,
         createdAt: true,
-        updatedAt: true,
+        updatedAt: false,
         password: false,
       },
       data: updatedData,
+    });
+  }
+
+  async updateUserAvatarByEmail(
+    email: string,
+    imagePath: string,
+  ): Promise<void> {
+    await this.prisma.user.update({
+      where: { email: email }, // Use email to find the user
+      data: {
+        avatar: imagePath, // Update the avatar path
+      },
     });
   }
 

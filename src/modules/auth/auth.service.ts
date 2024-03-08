@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../users/user.service';
@@ -14,6 +18,33 @@ export class AuthService {
     private jwtService: JwtService,
     private readonly usersService: UserService,
   ) {}
+
+  async changePassword(
+    email: string,
+    oldPassword: string,
+    newPassword: string,
+  ): Promise<any> {
+    const user = await this.prismaService.user.findUnique({
+      where: { email: email },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
+    if (!isOldPasswordValid) {
+      throw new BadRequestException('Old password is incorrect');
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    await this.prismaService.user.update({
+      where: { email: email },
+      data: { password: hashedNewPassword },
+    });
+
+    return { message: 'Password successfully changed' };
+  }
 
   async login(loginDto: LoginDto): Promise<any> {
     const { email, password } = loginDto;

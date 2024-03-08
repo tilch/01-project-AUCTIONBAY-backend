@@ -1,5 +1,13 @@
 import { AuthService } from './auth.service';
-import { Body, Controller, Post, Req, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpStatus,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { Request, Response } from 'express';
 import { LoginDto } from './dto/login-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
@@ -10,11 +18,48 @@ import {
   ApiTags,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Authentication')
 @Controller()
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  @UseGuards(AuthGuard('jwt')) // Ensure this matches the name you've given your JWT strategy
+  @Post('/change-password')
+  @ApiOperation({ summary: 'Change user password' })
+  @ApiOkResponse({ description: 'Password successfully changed' })
+  @ApiBadRequestResponse({ description: 'Bad request' })
+  async changePassword(
+    @Req() request: any, // Use `any` to access custom properties, or better, define a custom Request interface
+    @Res() response: Response,
+    @Body() body: { oldPassword: string; newPassword: string },
+  ): Promise<any> {
+    try {
+      // Assuming `request.user.email` contains the email from JWT token
+      const userEmail = request.user.email;
+
+      // Call the service to change the password
+      await this.authService.changePassword(
+        userEmail,
+        body.oldPassword,
+        body.newPassword,
+      );
+
+      // If successful, return an OK response
+      return response.status(HttpStatus.OK).json({
+        status: 'Success',
+        message: 'Password successfully changed',
+      });
+    } catch (error) {
+      // Handle errors appropriately
+      return response.status(HttpStatus.BAD_REQUEST).json({
+        status: 'Error',
+        message: error.message,
+      });
+    }
+  }
 
   @Post('/login')
   @ApiOperation({ summary: 'User login' })

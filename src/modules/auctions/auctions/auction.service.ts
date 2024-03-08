@@ -7,7 +7,7 @@ import { PrismaService } from '../../../prisma.service';
 import { Auction } from '../../../entities/auction.model';
 import { CreateAuctionDto } from './dto/create-auction.dto';
 import { UpdateAuctionDto } from './dto/update-auction.dto';
-import { diskStorage } from 'multer';
+import { AuctionWithUserBid } from '../../../entities/auction.userBid.model';
 
 @Injectable()
 export class AuctionService {
@@ -15,7 +15,7 @@ export class AuctionService {
 
   async createAuction(
     createAuctionDto: CreateAuctionDto,
-    email: string, // Now expecting email instead of userId
+    email: string, // email instead of username
     imagePath: string,
   ): Promise<Auction> {
     const startPrice = parseFloat(String(createAuctionDto.startPrice));
@@ -43,6 +43,7 @@ export class AuctionService {
     id: string,
     email: string,
     updateAuctionDto: UpdateAuctionDto,
+    imagePath?: string,
   ): Promise<Auction | null> {
     const auctionId = parseInt(id, 10);
     const user = await this.prisma.user.findUnique({
@@ -57,9 +58,18 @@ export class AuctionService {
     if (!auction || auction.userId !== user.id) {
       throw new UnauthorizedException('You can only update your own auctions.');
     }
+
+    const updateData = {
+      ...updateAuctionDto,
+    };
+
+    // If an image path is provided, include it in the update data
+    if (imagePath) {
+      updateData.imageUrl = imagePath;
+    }
     return this.prisma.auction.update({
       where: { id: auctionId },
-      data: updateAuctionDto,
+      data: updateData,
     });
   }
 
@@ -88,24 +98,41 @@ export class AuctionService {
     });
   }
 
-  async findAllAuctions(): Promise<Auction[]> {
-    return this.prisma.auction.findMany({
+  async findAllAuctions(userEmail: string): Promise<AuctionWithUserBid[]> {
+    const auctions = await this.prisma.auction.findMany({
+      where: { endTime: { gt: new Date() } },
+      orderBy: { endTime: 'asc' },
+    });
+
+    const user = await this.prisma.user.findUnique({
+      where: { email: userEmail },
+    });
+
+    if (!user) throw new Error('User not found');
+
+    // Fetch all user bids based on the found user's ID
+    const userBids = await this.prisma.bid.findMany({
+      where: { userId: user.id },
+      select: { auctionId: true },
+    });
+    const userBidAuctionIds = userBids.map((bid) => bid.auctionId);
+
+    // Enhance auctions with the userHasBid property
+    return auctions.map((auction) => ({
+      ...auction,
+      userHasBid: userBidAuctionIds.includes(auction.id),
+    }));
+  }
+
+  async findAuctionById(id: number): Promise<Auction | null> {
+    const auctionId = parseInt(String(id), 10);
+    return this.prisma.auction.findUnique({
       where: {
-        endTime: {
-          gt: new Date(), // This checks that the endTime is greater than the current date and time
-        },
+        id: auctionId,
       },
     });
   }
 
-  async findAuctionById(id: number): Promise<Auction | null> {
-    const auctionId = parseInt(String(id), 10); // Ensure id is a number
-    return this.prisma.auction.findUnique({
-      where: {
-        id: auctionId, // Use the correct variable name here
-      },
-    });
-  }
   async findAuctionsCreatedByUser(email: string): Promise<Auction[]> {
     const user = await this.prisma.user.findUnique({
       where: { email: email },
@@ -148,7 +175,7 @@ export class AuctionService {
     if (!user) {
       throw new UnauthorizedException('User not found.');
     }
-    const now = new Date(); // Get current date and time
+    const now = new Date();
     return this.prisma.auction.findMany({
       where: {
         bids: {

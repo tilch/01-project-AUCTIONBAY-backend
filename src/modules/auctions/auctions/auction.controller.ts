@@ -64,6 +64,7 @@ export class AuctionController {
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('image', multerConfigAuctions))
   @ApiOperation({ summary: 'Update an auction' })
   @ApiOkResponse({ description: 'Auction has been successfully updated.' })
   @ApiBadRequestResponse({ description: 'Bad Request.' })
@@ -72,14 +73,17 @@ export class AuctionController {
     @Param('id') id: string,
     @Req() req,
     @Body() updateAuctionDto: UpdateAuctionDto,
+    @UploadedFile() file: Express.Multer.File,
   ) {
-    if (!req.user || !req.user.username) {
+    if (!req.user || !req.user.email) {
       throw new UnauthorizedException('User not authenticated.');
     }
+    const imagePath = file ? '/uploads/auctions/' + file.filename : undefined; // Handle file path as needed
     return this.auctionService.updateAuction(
       id,
-      req.user.username,
+      req.user.email,
       updateAuctionDto,
+      imagePath,
     );
   }
   @Get('/my-auctions')
@@ -127,10 +131,14 @@ export class AuctionController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get all auctions' })
   @ApiOkResponse({ description: 'List of all auctions.' })
-  async findAll() {
-    return this.auctionService.findAllAuctions();
+  async findAll(@Req() req) {
+    if (!req.user || !req.user.email) {
+      throw new UnauthorizedException('User not authenticated.');
+    }
+    return this.auctionService.findAllAuctions(req.user.email);
   }
 
   @Get(':id')
